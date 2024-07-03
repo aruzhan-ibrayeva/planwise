@@ -27,28 +27,30 @@ def main():
     try:
         service = build("calendar", "v3", credentials=creds)
 
-        now = dt.datetime.now().isoformat() + "Z"  # 'Z' indicates UTC time
-        print("Getting the upcoming 5 events")
-        events_result = (
-            service.events()
-            .list(
-                calendarId="primary",
-                timeMin=now,
-                maxResults=5,
-                singleEvents=True,
-                orderBy="startTime"
-            )
-            .execute()
-        )
-        events = events_result.get("items", [])
+        event = {
+            "summary": "Python Event",
+            "location": "Online",
+            "description": "Details of event",
+            "colorId": 4,
+            "start": {
+                "dateTime": "2024-07-05T09:00:00+05:00",
+                "timeZone": "Asia/Oral"
+            },
+            "end": {
+                "dateTime": "2024-07-05T11:00:00+05:00",
+                "timeZone": "Asia/Oral"
+            },
+            "recurrence": [
+                "RRULE:FREQ=DAILY;COUNT=3"
+            ],
+            "attendees": [
+                {"email": "aruabay@gmail.com"}
+            ]
+        }
 
-        if not events:
-            print("No upcoming events found.")
-            return
+        event = service.events().insert(calendarId="primary", body=event).execute()
 
-        for event in events:
-            start = event["start"].get("dateTime", event["start"].get("date"))
-            print(start, event["summary"])
+        print(f"Event created: {event.get('htmlLink')}")
 
     except HttpError as error:
         print("An error occurred:", error)
