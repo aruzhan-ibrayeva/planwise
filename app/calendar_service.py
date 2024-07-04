@@ -8,6 +8,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from app.config import SCOPES
+from app.utils import load_json
 
 def get_credentials():
     creds = None
@@ -23,26 +24,25 @@ def get_credentials():
             token.write(creds.to_json())
     return creds
 
-def create_event():
+def create_event(event_file):
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
+        event_details = load_json(event_file)
         event = {
-            "summary": "PLANWISE EVENT",
-            "location": "planwise-ai.com",
-            "description": "Mvp of planwise ai",
-            "colorId": 2,
+            "summary": event_details["summary"],
+            "location": event_details["location"],
+            "description": event_details["description"],
+            "colorId": event_details["colorId"],
             "start": {
-                "dateTime": "2024-07-04T09:00:00+05:00",
-                "timeZone": "Asia/Oral"
+                "dateTime": event_details["start"]["dateTime"],
+                "timeZone": event_details["start"]["timeZone"]
             },
             "end": {
-                "dateTime": "2024-07-05T11:00:00+05:00",
-                "timeZone": "Asia/Oral"
+                "dateTime": event_details["end"]["dateTime"],
+                "timeZone": event_details["end"]["timeZone"]
             },
-            "recurrence": [
-                "RRULE:FREQ=DAILY;COUNT=1"
-            ]
+            "recurrence": event_details.get("recurrence", [])
         }
         event = service.events().insert(calendarId="primary", body=event).execute()
         print(f"Event created: {event.get('htmlLink')}")
@@ -66,32 +66,5 @@ def get_upcoming_events():
                 start = event['start'].get('dateTime', event['start'].get('date'))
                 file.write(f"{start} - {event['summary']}\n")
         print("5 upcoming events are inserted into upcoming_events.txt")
-    except HttpError as error:
-        print("An error occurred:", error)
-
-def create_task(task_title, task_notes=None, due_date=None):
-    creds = get_credentials()
-    try:
-        service = build("tasks", "v1", credentials=creds)
-        task = {
-            "title": task_title,
-            "notes": task_notes,
-            "due": due_date
-        }
-        result = service.tasks().insert(tasklist='@default', body=task).execute()
-        print(f"Task created: {result.get('title')}")
-    except HttpError as error:
-        print("An error occurred:", error)
-
-def get_tasks():
-    creds = get_credentials()
-    try:
-        service = build("tasks", "v1", credentials=creds)
-        tasks_result = service.tasks().list(tasklist='@default', maxResults=10).execute()
-        tasks = tasks_result.get('items', [])
-        if not tasks:
-            print("No tasks found.")
-        for task in tasks:
-            print(f"{task['title']} - Due: {task.get('due')}")
     except HttpError as error:
         print("An error occurred:", error)

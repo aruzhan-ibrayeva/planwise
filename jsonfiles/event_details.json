@@ -1,0 +1,17 @@
+{
+    "summary": "NEW EVENT",
+    "location": "planwise-ai.com",
+    "description": "PLEASE WORK",
+    "colorId": 2,
+    "start": {
+        "dateTime": "2024-07-04T12:00:00+05:00",
+        "timeZone": "Asia/Oral"
+    },
+    "end": {
+        "dateTime": "2024-07-05T10:00:00+05:00",
+        "timeZone": "Asia/Oral"
+    },
+    "recurrence": [
+        "RRULE:FREQ=DAILY;COUNT=1"
+    ]
+}
