@@ -1,42 +1,22 @@
-import os.path
-
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from app.config import SCOPES
-from app.utils import load_json
+from app.utils import get_credentials
 
-def get_credentials():
-    creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open("token.json", "w") as token:
-            token.write(creds.to_json())
-    return creds
-
-def create_task(task_file):
+def create_task(task_details):
     creds = get_credentials()
     try:
         service = build("tasks", "v1", credentials=creds)
-        task_details = load_json(task_file)
         task = {
             "title": task_details["title"],
             "notes": task_details.get("notes"),
             "due": task_details.get("due")
         }
         result = service.tasks().insert(tasklist='@default', body=task).execute()
-        print(f"Task created: {result.get('title')}")
+        return result  
     except HttpError as error:
-        print("An error occurred:", error)
+        print(f"An error occurred: {error}")
+        return None
 
 def get_tasks():
     creds = get_credentials()
