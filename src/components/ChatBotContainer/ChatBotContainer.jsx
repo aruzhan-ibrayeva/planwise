@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { MessageList, Message, MessageInput } from '@chatscope/chat-ui-kit-react';
+import { MessageList, Message, MessageInput, MessageSeparator } from '@chatscope/chat-ui-kit-react';
 import aiAssistantLogo from '../../assets/images/ai_assistant.png';
 
-const ChatBotContainer = ({ messages, isTyping, handleSend }) => {
-    const [inputValue, setInputValue] = useState("");  // State to manage the input value
+const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, approvedPlan }) => {
+    const [inputValue, setInputValue] = useState("");
 
     const handleChange = (value) => {
-        setInputValue(value);  // Update state when input changes
+        setInputValue(value);
     };
 
     const handleSendClick = () => {
-        handleSend(inputValue);  // Send the current input value
-        setInputValue("");  // Clear the input after sending
+        handleSend(inputValue);
+        setInputValue("");
     };
 
     return (
@@ -21,18 +21,25 @@ const ChatBotContainer = ({ messages, isTyping, handleSend }) => {
             </div>
             <MessageList className="message-list">
                 {messages.map((msg, index) => (
-                    <Message 
-                        key={index} 
-                        model={{
-                            message: msg.message,
-                            direction: msg.direction,
-                            position: msg.position
-                        }} 
-                        avatar={aiAssistantLogo}
-                    />
+                    <div key={index} className="message-item">
+                        <Message
+                            model={{
+                                message: msg.message,
+                                direction: msg.direction,
+                                position: msg.position
+                            }}
+                            avatar={aiAssistantLogo}
+                        />
+                        {approvedPlan && msg.direction === "incoming" && (
+                            <button className="approve-button" onClick={handleApproval}>
+                                Approve
+                            </button>
+                        )}
+                    </div>
                 ))}
+                {isTyping && <MessageSeparator>Typing...</MessageSeparator>}
             </MessageList>
-            <MessageInput 
+            <MessageInput
                 placeholder="Type your request here..."
                 value={inputValue}
                 onChange={handleChange}

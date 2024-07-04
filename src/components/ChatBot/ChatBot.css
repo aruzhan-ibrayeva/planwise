@@ -35,6 +35,30 @@
     background: #e5e5e5;
 }
 
+.message-item {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.approve-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+.approve-button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.approve-button:hover {
+    background-color: #45a049;
+}
+
 .message-input input {
     width: calc(100% - 20px);
     padding: 12px 10px;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ChatBotContainer from '../ChatBotContainer/ChatBotContainer';
 import { sendMessage } from '../../utils/api';
+import { createEvent } from '../../api/index';
 import "./ChatBot.css";
 import { parse } from 'chrono-node';
 
@@ -12,14 +13,14 @@ function ChatBot() {
         position: "single"
     }]);
     const [isTyping, setIsTyping] = useState(false);
+    const [approvedPlan, setApprovedPlan] = useState(null);
 
     const handleSend = async (inputMessage) => {
         setIsTyping(true);
 
-        // Parse the message for dates
-        const results = parse(inputMessage);
         let parsedMessage = inputMessage;
 
+        const results = parse(inputMessage);
         if (results.length > 0) {
             const { start } = results[0];
             const date = start.date();
@@ -27,21 +28,19 @@ function ChatBot() {
             parsedMessage = `Did you mean: ${formattedDate}? Please confirm.`;
         }
 
-        // Construct the user message to add to state
         const userMessage = {
             message: inputMessage,
             direction: 'outgoing',
             sender: "user"
         };
 
-        // Add user message to state
         setMessages(prevMessages => [...prevMessages, userMessage]);
 
-        // Prepare and send the API request
         const apiRequestBody = {
             model: "gpt-3.5-turbo",
             messages: [
-                { role: "system", content: "Generate a short simple plan." },
+                { role: "system", content: 
+                                            "Your task is. 1. Schedule an event. 2. Generate a plan for a task. You can ask me questions if needed. After I say that it is approved, create a json file formatted to send to Google Calendar or create a json file containing each task with their deadlines included"},
                 ...messages.map(msg => ({
                     role: msg.sender === "ChatGPT" ? "assistant" : "user",
                     content: msg.message
@@ -52,9 +51,8 @@ function ChatBot() {
 
         try {
             const response = await sendMessage(apiRequestBody);
-            let botMessages = [];
+            const botMessages = [];
 
-            // Construct the bot's parsed date message if applicable
             if (parsedMessage !== inputMessage) {
                 const parseConfirmMessage = {
                     message: parsedMessage,
@@ -64,7 +62,6 @@ function ChatBot() {
                 botMessages.push(parseConfirmMessage);
             }
 
-            // Handle response from API
             if (response.choices && response.choices.length > 0) {
                 const finalReply = {
                     message: response.choices[0].message.content,
@@ -72,9 +69,22 @@ function ChatBot() {
                     sender: "ChatGPT"
                 };
                 botMessages.push(finalReply);
+
+                const jsonStartIndex = response.choices[0].message.content.indexOf('```json');
+                const jsonEndIndex = response.choices[0].message.content.lastIndexOf('```');
+                if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+                    const jsonString = response.choices[0].message.content.substring(jsonStartIndex + 7, jsonEndIndex);
+                    try {
+                        const jsonData = JSON.parse(jsonString);
+                        setApprovedPlan(jsonData);
+                    } catch (error) {
+                        console.error("Failed to parse JSON:", error);
+                    }
+                } else {
+                    setApprovedPlan(null);
+                }
             }
 
-            // Add bot messages to state
             setMessages(prevMessages => [...prevMessages, ...botMessages]);
         } catch (error) {
             console.error("Error sending message:", error);
@@ -83,12 +93,33 @@ function ChatBot() {
         }
     };
 
+    const handleApproval = async () => {
+        if (approvedPlan) {
+            try {
+                const response = await createEvent(approvedPlan);
+                console.log("Plan approved and sent to backend:", response);
+                setMessages(prevMessages => [...prevMessages, {
+                    message: "Plan approved and sent to backend.",
+                    direction: "incoming",
+                    sender: "ChatGPT"
+                }]);
+                setApprovedPlan(null);
+            } catch (error) {
+                console.error("Failed to send plan to backend:", error);
+            }
+        }
+    };
+
     return (
-        <ChatBotContainer
-            messages={messages}
-            isTyping={isTyping}
-            handleSend={handleSend}
-        />
+        <div>
+            <ChatBotContainer
+                messages={messages}
+                isTyping={isTyping}
+                handleSend={handleSend}
+                handleApproval={handleApproval}
+                approvedPlan={approvedPlan}
+            />
+        </div>
     );
 }
 
