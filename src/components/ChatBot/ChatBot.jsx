@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import ChatBotContainer from './ChatBotContainer';
+import ChatBotContainer from '../ChatBotContainer/ChatBotContainer';
 import { sendMessage } from '../../utils/api';
-import "../../styles/ChatBot.css";
+import "./ChatBot.css";
 import { parse } from 'chrono-node';
 
 function ChatBot() {

@@ -1,7 +1,7 @@
 import React from 'react';
-import './styles/ChatBot.css';
+import './components/ChatBot/ChatBot.css';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
-import ChatBot from './components/ChatBot/ChatBot';
+import ChatBot from './components/ChatBot/ChatBot.jsx';
 
 function App() {
     return (
