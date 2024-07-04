@@ -13,53 +13,69 @@ function ChatBot() {
     }]);
     const [isTyping, setIsTyping] = useState(false);
 
-    const handleSend = async (message) => {
-        const results = parse(message);
-        let messageToSend = message;
+    const handleSend = async (inputMessage) => {
+        setIsTyping(true);
+
+        // Parse the message for dates
+        const results = parse(inputMessage);
+        let parsedMessage = inputMessage;
 
         if (results.length > 0) {
             const { start } = results[0];
             const date = start.date();
             const formattedDate = `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-            messageToSend = `Did you mean: ${formattedDate}? Please confirm.`;
+            parsedMessage = `Did you mean: ${formattedDate}? Please confirm.`;
         }
 
-        const newMessage = {
-            message,
+        // Construct the user message to add to state
+        const userMessage = {
+            message: inputMessage,
             direction: 'outgoing',
             sender: "user"
         };
-        const replyMessage = {
-            message: messageToSend,
-            direction: 'incoming',
-            sender: "ChatGPT"
+
+        // Add user message to state
+        setMessages(prevMessages => [...prevMessages, userMessage]);
+
+        // Prepare and send the API request
+        const apiRequestBody = {
+            model: "gpt-3.5-turbo",
+            messages: [
+                { role: "system", content: "Generate a short simple plan." },
+                ...messages.map(msg => ({
+                    role: msg.sender === "ChatGPT" ? "assistant" : "user",
+                    content: msg.message
+                })),
+                { role: "user", content: inputMessage }
+            ]
         };
 
-        setMessages(prevMessages => [...prevMessages, newMessage, replyMessage]);
-        setIsTyping(true);
-
         try {
-            const apiRequestBody = {
-                model: "gpt-3.5-turbo",
-                messages: [
-                    { role: "system", content: "Generate a short simple plan." },
-                    ...messages.map(msg => ({
-                        role: msg.sender === "ChatGPT" ? "assistant" : "user",
-                        content: msg.message
-                    })),
-                    { role: "user", content: message }
-                ]
-            };
-
             const response = await sendMessage(apiRequestBody);
+            let botMessages = [];
+
+            // Construct the bot's parsed date message if applicable
+            if (parsedMessage !== inputMessage) {
+                const parseConfirmMessage = {
+                    message: parsedMessage,
+                    direction: 'incoming',
+                    sender: "ChatGPT"
+                };
+                botMessages.push(parseConfirmMessage);
+            }
+
+            // Handle response from API
             if (response.choices && response.choices.length > 0) {
                 const finalReply = {
                     message: response.choices[0].message.content,
-                    sender: "ChatGPT",
-                    direction: "incoming"
+                    direction: "incoming",
+                    sender: "ChatGPT"
                 };
-                setMessages(prevMessages => [...prevMessages, finalReply]);
+                botMessages.push(finalReply);
             }
+
+            // Add bot messages to state
+            setMessages(prevMessages => [...prevMessages, ...botMessages]);
         } catch (error) {
             console.error("Error sending message:", error);
         } finally {

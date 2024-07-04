@@ -3,10 +3,15 @@ import { MessageList, Message, MessageInput } from '@chatscope/chat-ui-kit-react
 import aiAssistantLogo from '../../assets/images/ai_assistant.png';
 
 const ChatBotContainer = ({ messages, isTyping, handleSend }) => {
-    const [inputValue, setInputValue] = useState("");
+    const [inputValue, setInputValue] = useState("");  // State to manage the input value
 
-    const handleInputChange = (value) => {
-        setInputValue(value);
+    const handleChange = (value) => {
+        setInputValue(value);  // Update state when input changes
+    };
+
+    const handleSendClick = () => {
+        handleSend(inputValue);  // Send the current input value
+        setInputValue("");  // Clear the input after sending
     };
 
     return (
@@ -28,10 +33,10 @@ const ChatBotContainer = ({ messages, isTyping, handleSend }) => {
                 ))}
             </MessageList>
             <MessageInput 
-                placeholder="Create a plan for exam preparation..." 
-                onSend={handleSend} 
-                onChange={handleInputChange}
+                placeholder="Type your request here..."
                 value={inputValue}
+                onChange={handleChange}
+                onSend={handleSendClick}
             />
         </div>
     );
