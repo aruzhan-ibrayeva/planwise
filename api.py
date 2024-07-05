@@ -3,6 +3,7 @@ from app.calendar_service import create_event, get_upcoming_events
 from app.task_service import create_task, get_tasks
 from flask_cors import CORS
 import logging
+import json
 
 from flask_socketio import SocketIO
 
@@ -15,8 +16,12 @@ socketio = SocketIO(app)
 def api_create_event():
     try:
         event_data = request.json
+        logging.info(f"Received event data: {event_data}")
         if not event_data:
             return jsonify({'message': 'No data provided'}), 400
+        if 'start' not in event_data or 'end' not in event_data:
+            return jsonify({'message': 'Missing required fields: start or end'}), 400
+        logging.info(f"Formatted event data: {json.dumps(event_data, indent=2)}")  # Print the formatted JSON 
         event_link = create_event(event_data)
         return jsonify({'message': 'Event created successfully', 'link': event_link}), 201
     except Exception as e:

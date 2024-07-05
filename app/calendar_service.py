@@ -1,40 +1,41 @@
-import os.path
-import datetime as dt
-
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-
 from app.utils import get_credentials
+import logging
 
 def create_event(event_data):
     creds = get_credentials()
     service = build("calendar", "v3", credentials=creds)
     
+    start_time = event_data.get('start', {}).get('dateTime')
+    end_time = event_data.get('end', {}).get('dateTime')
+    time_zone = event_data.get('start', {}).get('timeZone')
+
     event = {
-    'summary': event_data.get('summary', 'No Title'),
-    'location': event_data.get('location', ''),
-    'description': event_data.get('description', ''),
-    'start': {
-        'dateTime': event_data['start'],
-        'timeZone': 'Asia/Oral',
-    },
-    'end': {
-        'dateTime': event_data['end'],
-        'timeZone': 'Asia/Oral',
-    },
-    'recurrence': [
-        'RRULE:FREQ=DAILY;COUNT=1'
-    ],
-    'attendees': [
-        {'email': attendee} for attendee in event_data.get('attendees', [])
-    ],
-    'reminders': {
-        'useDefault': False,
-        'overrides': [
-            {'method': 'email', 'minutes': 24 * 60},
-            {'method': 'popup', 'minutes': 10},
+        'summary': event_data.get('summary', 'No Title'),
+        'location': event_data.get('location', ''),
+        'description': event_data.get('description', ''),
+        'start': {
+            'dateTime': start_time,
+            'timeZone': time_zone
+        },
+        'end': {
+            'dateTime': end_time,
+            'timeZone': time_zone
+        },
+        'recurrence': [
+            'RRULE:FREQ=DAILY;COUNT=1'
         ],
-    },
+        'attendees': [
+            {'email': attendee.get('email')} for attendee in event_data.get('attendees', [])
+        ],
+        'reminders': {
+            'useDefault': False,
+            'overrides': [
+                {'method': 'email', 'minutes': 24 * 60},
+                {'method': 'popup', 'minutes': 10},
+            ],
+        },
     }
 
     event = service.events().insert(calendarId='primary', body=event).execute()
