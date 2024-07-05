@@ -17,11 +17,12 @@ const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, appr
     return (
         <div className="chat-container">
             <div className="chat-header">
+                <img src="aiAssistantLogo" alt="Avatar" class="chat-avatar"/>
                 PlanWise AI generates an efficient plan, prioritizes and timeblocks your tasks on your calendar, and helps you achieve your tasks throughout the day
             </div>
             <MessageList className="message-list">
                 {messages.map((msg, index) => (
-                    <div key={index} className="message-item">
+                    <div key={index}>
                         <Message
                             model={{
                                 message: msg.message,
@@ -31,9 +32,11 @@ const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, appr
                             avatar={aiAssistantLogo}
                         />
                         {approvedPlan && msg.direction === "incoming" && (
-                            <button className="approve-button" onClick={handleApproval}>
-                                Approve
-                            </button>
+                            <MessageSeparator>
+                                <button className="approve-button" onClick={handleApproval}>
+                                    Approve
+                                </button>
+                            </MessageSeparator>
                         )}
                     </div>
                 ))}

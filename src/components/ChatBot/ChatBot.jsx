@@ -12,6 +12,7 @@ function ChatBot() {
         direction: "incoming",
         position: "single"
     }]);
+
     const [isTyping, setIsTyping] = useState(false);
     const [approvedPlan, setApprovedPlan] = useState(null);
 
@@ -39,8 +40,10 @@ function ChatBot() {
         const apiRequestBody = {
             model: "gpt-3.5-turbo",
             messages: [
-                { role: "system", content: 
-                                            "Your task is. 1. Schedule an event. 2. Generate a plan for a task. You can ask me questions if needed. After I say that it is approved, create a json file formatted to send to Google Calendar or create a json file containing each task with their deadlines included"},
+                {
+                    role: "system", content:
+                        "Your task is. 1. Schedule an event. OR 2. Generate a plan for a task. You can ask me questions if needed. After I say that it is approved, create a json file formatted to send to Google Calendar or create a json file containing each task with their deadlines included and json approve button show on front"
+                },
                 ...messages.map(msg => ({
                     role: msg.sender === "ChatGPT" ? "assistant" : "user",
                     content: msg.message
@@ -76,6 +79,14 @@ function ChatBot() {
                     const jsonString = response.choices[0].message.content.substring(jsonStartIndex + 7, jsonEndIndex);
                     try {
                         const jsonData = JSON.parse(jsonString);
+
+                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        if (jsonData.start && jsonData.end) {
+                            jsonData.start.timeZone = timeZone;
+                            jsonData.end.timeZone = timeZone;
+                        }
+
+                        console.log("Approved Plan JSON Data:", JSON.stringify(jsonData, null, 2));
                         setApprovedPlan(jsonData);
                     } catch (error) {
                         console.error("Failed to parse JSON:", error);
@@ -96,6 +107,7 @@ function ChatBot() {
     const handleApproval = async () => {
         if (approvedPlan) {
             try {
+                console.log("Sending approved plan to backend:", JSON.stringify(approvedPlan, null, 2));
                 const response = await createEvent(approvedPlan);
                 console.log("Plan approved and sent to backend:", response);
                 setMessages(prevMessages => [...prevMessages, {
