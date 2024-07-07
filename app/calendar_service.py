@@ -2,6 +2,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from app.utils import get_credentials
 import logging
+import datetime as dt
 
 def create_event(event_data):
     creds = get_credentials()
@@ -46,7 +47,7 @@ def get_upcoming_events():
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
-        now = dt.datetime.now().isoformat() + 'Z'  # 'Z' indicates UTC time
+        now = dt.now().isoformat() + 'Z'  # 'Z' indicates UTC time
         events_result = service.events().list(
             calendarId='primary', timeMin=now,
             maxResults=5, singleEvents=True,
