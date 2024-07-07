@@ -1,33 +1,36 @@
 import React, { useState } from 'react';
 import ChatBotContainer from '../ChatBotContainer/ChatBotContainer';
-import { sendMessage } from '../../utils/api';
+import { sendMessage } from '../../api/gpt';
 import { createEvent } from '../../api/index';
-import "./ChatBot.css";
 import { parse } from 'chrono-node';
+import "./ChatBot.css";
 
 function ChatBot() {
-    const [messages, setMessages] = useState([{
+    const initialMessage = {
         message: "Hi! I am your AI Assistant. Start speaking or type your request so that I can generate you a plan",
         sender: "ChatGPT",
         direction: "incoming",
         position: "single"
-    }]);
+    };
 
+    const [messages, setMessages] = useState([initialMessage]);
     const [isTyping, setIsTyping] = useState(false);
     const [approvedPlan, setApprovedPlan] = useState(null);
 
-    const handleSend = async (inputMessage) => {
-        setIsTyping(true);
-
-        let parsedMessage = inputMessage;
-
+    const formatMessageWithDate = (inputMessage) => {
         const results = parse(inputMessage);
         if (results.length > 0) {
             const { start } = results[0];
             const date = start.date();
-            const formattedDate = `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-            parsedMessage = `Did you mean: ${formattedDate}? Please confirm.`;
+            return `${inputMessage} (${date.toLocaleDateString()} at ${date.toLocaleTimeString()})`;
         }
+        return inputMessage;
+    };
+
+    const handleSend = async (inputMessage) => {
+        setIsTyping(true);
+
+        const formattedMessage = formatMessageWithDate(inputMessage);
 
         const userMessage = {
             message: inputMessage,
@@ -41,67 +44,62 @@ function ChatBot() {
             model: "gpt-3.5-turbo",
             messages: [
                 {
-                    role: "system", content:
-                        "Your task is. 1. Schedule an event. OR 2. Generate a plan for a task. You can ask me questions if needed. After I say that it is approved, create a json file formatted to send to Google Calendar or create a json file containing each task with their deadlines included and json approve button show on front"
-                },
+                    "role": "system",
+                    "content": "You are an AI assistant. Your tasks are as follows: 1. Schedule an event. You may ask clarifying questions if needed. Once I approve the event, format the details into a JSON file suitable for Google Calendar.  Indicate the approval with the JSON file by displaying an 'Approve' button in the front."
+                }
+                ,
                 ...messages.map(msg => ({
                     role: msg.sender === "ChatGPT" ? "assistant" : "user",
                     content: msg.message
                 })),
-                { role: "user", content: inputMessage }
+                { role: "user", content: formattedMessage }
             ]
         };
 
         try {
             const response = await sendMessage(apiRequestBody);
-            const botMessages = [];
-
-            if (parsedMessage !== inputMessage) {
-                const parseConfirmMessage = {
-                    message: parsedMessage,
-                    direction: 'incoming',
-                    sender: "ChatGPT"
-                };
-                botMessages.push(parseConfirmMessage);
-            }
-
-            if (response.choices && response.choices.length > 0) {
-                const finalReply = {
-                    message: response.choices[0].message.content,
-                    direction: "incoming",
-                    sender: "ChatGPT"
-                };
-                botMessages.push(finalReply);
-
-                const jsonStartIndex = response.choices[0].message.content.indexOf('```json');
-                const jsonEndIndex = response.choices[0].message.content.lastIndexOf('```');
-                if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
-                    const jsonString = response.choices[0].message.content.substring(jsonStartIndex + 7, jsonEndIndex);
-                    try {
-                        const jsonData = JSON.parse(jsonString);
-
-                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                        if (jsonData.start && jsonData.end) {
-                            jsonData.start.timeZone = timeZone;
-                            jsonData.end.timeZone = timeZone;
-                        }
-
-                        console.log("Approved Plan JSON Data:", JSON.stringify(jsonData, null, 2));
-                        setApprovedPlan(jsonData);
-                    } catch (error) {
-                        console.error("Failed to parse JSON:", error);
-                    }
-                } else {
-                    setApprovedPlan(null);
-                }
-            }
-
-            setMessages(prevMessages => [...prevMessages, ...botMessages]);
+            handleApiResponse(response);
         } catch (error) {
             console.error("Error sending message:", error);
         } finally {
             setIsTyping(false);
         }
+    };
+
+    const handleApiResponse = (response) => {
+        const botMessages = [];
+        if (response.choices && response.choices.length > 0) {
+            const finalReply = {
+                message: response.choices[0].message.content,
+                direction: "incoming",
+                sender: "ChatGPT"
+            };
+            botMessages.push(finalReply);
+
+            const jsonStartIndex = response.choices[0].message.content.indexOf('```json');
+            const jsonEndIndex = response.choices[0].message.content.lastIndexOf('```');
+            if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+                const jsonString = response.choices[0].message.content.substring(jsonStartIndex + 7, jsonEndIndex);
+                try {
+                    const jsonData = JSON.parse(jsonString);
+
+                    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    if (jsonData.start && jsonData.end) {
+                        jsonData.start.timeZone = timeZone;
+                        jsonData.end.timeZone = timeZone;
+                    }
+
+                    console.log("Approved Plan JSON Data:", JSON.stringify(jsonData, null, 2));
+                    setApprovedPlan(jsonData);
+                } catch (error) {
+                    console.error("Failed to parse JSON:", error);
+                }
+            } else {
+                setApprovedPlan(null);
+            }
+        }
+
+        setMessages(prevMessages => [...prevMessages, ...botMessages]);
     };
 
     const handleApproval = async () => {

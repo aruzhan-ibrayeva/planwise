@@ -17,7 +17,6 @@ const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, appr
     return (
         <div className="chat-container">
             <div className="chat-header">
-                <img src="aiAssistantLogo" alt="Avatar" class="chat-avatar"/>
                 PlanWise AI generates an efficient plan, prioritizes and timeblocks your tasks on your calendar, and helps you achieve your tasks throughout the day
             </div>
             <MessageList className="message-list">
@@ -27,11 +26,11 @@ const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, appr
                             model={{
                                 message: msg.message,
                                 direction: msg.direction,
-                                position: msg.position
+                                position: msg.position,
+                                avatar: msg.sender === "ChatGPT" ? aiAssistantLogo : null  // Set avatar for AI assistant
                             }}
-                            avatar={aiAssistantLogo}
                         />
-                        {approvedPlan && msg.direction === "incoming" && (
+                        {approvedPlan && index === messages.length - 1 && msg.direction === "incoming" && (
                             <MessageSeparator>
                                 <button className="approve-button" onClick={handleApproval}>
                                     Approve
@@ -47,6 +46,7 @@ const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, appr
                 value={inputValue}
                 onChange={handleChange}
                 onSend={handleSendClick}
+                showAttachmentButton={false}
             />
         </div>
     );

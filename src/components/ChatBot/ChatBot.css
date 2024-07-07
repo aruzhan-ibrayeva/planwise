@@ -23,52 +23,57 @@ body, html {
 
 .chat-header {
     padding: 20px;
-    background-color: #e8e8e8; /* Softer header background */
+    background-color: #e8e8e8; 
     text-align: center;
-    font-size: 16px; /* Larger font size for readability */
-    border-bottom: 2px solid #dedede; /* Subtle border for separation */
+    font-size: 16px; 
+    border-bottom: 2px solid #dedede; 
 }
+
+.cs-message-input__tools .cs-button--attachment {
+    display: none;
+}
+
 
 .message-list {
     flex-grow: 1;
     overflow-y: auto;
     padding: 20px;
-    background: #fafafa; /* Lighter background for the message area */
+    background: #fafafa; 
 }
 
 .message-item {
     background-color: #ffffff;
-    padding: 10px 15px; /* More padding for better text readability */
-    border-radius: 10px; /* More pronounced rounded corners */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow for depth */
+    padding: 10px 15px; 
+    border-radius: 10px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
     margin-bottom: 10px;
 }
 
 .message-input input {
-    width: calc(100% - 48px); /* Adjust width to fit padding */
-    padding: 12px 24px; /* More padding for easier input */
+    width: calc(100% - 48px); 
+    padding: 12px 24px; 
     border: 2px solid #ddd;
-    border-radius: 25px; /* More rounded corners */
+    border-radius: 25px; 
     font-size: 14px;
-    background-color: #fefefe; /* Slightly off-white background */
+    background-color: #fefefe; 
 }
 
 .message-input {
     padding: 10px;
     background-color: #fff;
-    border-top: 1px solid #ececec; /* Cleaner, lighter border */
+    border-top: 1px solid #ececec; 
 }
 
 .approve-button {
     padding: 8px 16px;
-    background-color: #4CAF50; /* No change needed here */
+    background-color: #4CAF50; 
     color: white;
-    border-radius: 8px; /* Consistently rounded buttons */
-    font-size: 14px; /* Standardize font size */
+    border-radius: 8px; 
+    font-size: 14px;
     cursor: pointer;
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
+    transition: background-color 0.3s; 
 }
 
 .approve-button:hover {
-    background-color: #45a049; /* Slightly darker on hover for tactile feel */
+    background-color: #45a049; 
 }
