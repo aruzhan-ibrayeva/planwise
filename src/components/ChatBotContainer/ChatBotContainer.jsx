@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageList, Message, MessageInput, MessageSeparator } from '@chatscope/chat-ui-kit-react';
+import { MessageList, Message, MessageInput, MessageSeparator, Avatar } from '@chatscope/chat-ui-kit-react';
 import aiAssistantLogo from '../../assets/images/ai_assistant.png';
 
 const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, approvedPlan }) => {
@@ -17,29 +17,29 @@ const ChatBotContainer = ({ messages, isTyping, handleSend, handleApproval, appr
     return (
         <div className="chat-container">
             <div className="chat-header">
-                PlanWise AI generates an efficient plan, prioritizes and timeblocks your tasks on your calendar, and helps you achieve your tasks throughout the day
+                PlanWise AI: Your productivity ally, expertly scheduling events, crafting strategic plans, and actively assisting you in accomplishing tasks all day long.
             </div>
             <MessageList className="message-list">
                 {messages.map((msg, index) => (
-                    <div key={index}>
-                        <Message
-                            model={{
-                                message: msg.message,
-                                direction: msg.direction,
-                                position: msg.position,
-                                avatar: msg.sender === "ChatGPT" ? aiAssistantLogo : null  // Set avatar for AI assistant
-                            }}
-                        />
-                        {approvedPlan && index === messages.length - 1 && msg.direction === "incoming" && (
-                            <MessageSeparator>
-                                <button className="approve-button" onClick={handleApproval}>
-                                    Approve
-                                </button>
-                            </MessageSeparator>
+                    <Message key={index} model={{
+                        message: msg.message,
+                        direction: msg.direction,
+                        position: msg.position,
+                        sender: msg.sender,
+                    }}>
+                        {msg.sender === "ChatGPT" && (
+                            <Avatar src={aiAssistantLogo} name="AI Assistant" />
                         )}
-                    </div>
+                    </Message>
                 ))}
                 {isTyping && <MessageSeparator>Typing...</MessageSeparator>}
+                {approvedPlan && (
+                    <MessageSeparator>
+                        <button className="approve-button" onClick={handleApproval}>
+                            Approve
+                        </button>
+                    </MessageSeparator>
+                )}
             </MessageList>
             <MessageInput
                 placeholder="Type your request here..."

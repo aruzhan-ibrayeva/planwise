@@ -1,11 +1,5 @@
 body, html {
-    height: 100%;
-    margin: 0;
-    display: flex;
     justify-content: center;
-    align-items: center;
-    background-color: #f4f4f9; 
-    font-family: 'Arial', sans-serif;
 }
 
 .chat-container {
@@ -32,7 +26,6 @@ body, html {
 .cs-message-input__tools .cs-button--attachment {
     display: none;
 }
-
 
 .message-list {
     flex-grow: 1;

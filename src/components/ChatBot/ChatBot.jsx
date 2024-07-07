@@ -105,11 +105,11 @@ function ChatBot() {
     const handleApproval = async () => {
         if (approvedPlan) {
             try {
-                console.log("Sending approved plan to backend:", JSON.stringify(approvedPlan, null, 2));
+                console.log("Adding your approved plan:", JSON.stringify(approvedPlan, null, 2));
                 const response = await createEvent(approvedPlan);
                 console.log("Plan approved and sent to backend:", response);
                 setMessages(prevMessages => [...prevMessages, {
-                    message: "Plan approved and sent to backend.",
+                    message: "Event was scheduled in your Google Calendar!",
                     direction: "incoming",
                     sender: "ChatGPT"
                 }]);
