@@ -7,7 +7,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from app.config import SCOPES
 
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 
 def load_json(file_path):
