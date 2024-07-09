@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import ChatBotContainer from '../ChatBotContainer/ChatBotContainer';
-import { sendMessage } from '../../api/gpt';
-import { createEvent } from '../../api/index';
+import ChatBotContainer from '../components/ChatBotContainer/ChatBotContainer';
+import { sendMessage } from '../api/gpt';
+import { createEvent } from '../api/index';
 import { parse } from 'chrono-node';
-import "./ChatBot.css";
+import "../styles/ChatBot.css";
 
 function ChatBot() {
     const initialMessage = {
@@ -41,11 +41,12 @@ function ChatBot() {
         setMessages(prevMessages => [...prevMessages, userMessage]);
 
         const apiRequestBody = {
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o",
+            temperature: 0.3,
             messages: [
                 {
                     "role": "system",
-                    "content": "You are an AI assistant. Your tasks are as follows: 1. Schedule an event. You may ask clarifying questions if needed. Once I approve the event, format the details into a JSON file suitable for Google Calendar.  Indicate the approval with the JSON file by displaying an 'Approve' button in the front."
+                    "content": "You are an AI assistant. This is 2024 year. I am in Almaty. Your tasks are as follows: 1. Schedule an event. You may ask clarifying questions if needed. Once I approve the event, format the details into a JSON file suitable for Google Calendar.  Indicate the approval with the JSON file by displaying an 'Approve' button in the front."
                 }
                 ,
                 ...messages.map(msg => ({

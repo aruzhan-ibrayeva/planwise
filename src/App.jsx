@@ -1,13 +1,23 @@
 import React from 'react';
-import './components/ChatBot/ChatBot.css';
+import {
+    BrowserRouter as Router,
+    Route,
+    Routes
+} from 'react-router-dom';
+import Home from './pages/Home.jsx';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
-import ChatBot from './components/ChatBot/ChatBot.jsx';
+import ChatBot from './pages/ChatBot.jsx';
 
 function App() {
     return (
-        <div className="App">
-            <ChatBot />
-        </div>
+        <Router>
+            <div className="App">
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/chatbot" element={<ChatBot />} />
+                </Routes>
+            </div>
+        </Router>
     );
 }
 
