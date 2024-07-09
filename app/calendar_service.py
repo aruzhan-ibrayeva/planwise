@@ -47,7 +47,7 @@ def get_upcoming_events():
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
-        now = datetime.now().isoformat() + 'Z'  # 'Z' indicates UTC time
+        now = datetime.now().isoformat() + 'Z' 
         events_result = service.events().list(
             calendarId='primary', timeMin=now,
             maxResults=5, singleEvents=True,
