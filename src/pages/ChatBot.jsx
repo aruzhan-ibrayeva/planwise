@@ -41,7 +41,7 @@ function ChatBot() {
         setMessages(prevMessages => [...prevMessages, userMessage]);
 
         const apiRequestBody = {
-            model: "gpt-4o",
+            model: "gpt-4o-mini",
             temperature: 0.3,
             messages: [
                 {
